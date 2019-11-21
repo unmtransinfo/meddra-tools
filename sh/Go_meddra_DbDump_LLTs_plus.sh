@@ -1,15 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 #############################################################################
 ### Go_meddra_Dump_LLTs_plus.sh
 ### Dump all LLTs, one per row, followed by corresponding PT, HLT, HLGT, SOC (hierarchical order).
 ### Jeremy J Yang
-### 21 Mar 2012
 #############################################################################
+#
 set -e
 #
-DB="meddra"
+DBNAME="meddra"
 #
-cat <<__EOF__  |psql -q -F ',' $DB
+cat <<__EOF__  |psql -q -F ',' -d $DBNAME
 \a
 SELECT
 	llt.id AS "llt_id",

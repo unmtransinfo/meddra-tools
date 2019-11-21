@@ -1,20 +1,24 @@
-#!/bin/sh
+#!/bin/bash
 #
 set -e
 #
+cwd=$(pwd)
+#
+DATADIR="${cwd}/data"
+#
 for f in \
-	data/meddra_soc_allterms.txt \
-	data/meddra_hlgt_allterms.txt \
-	data/meddra_pt_allterms.txt \
-	data/meddra_llt_allterms.txt \
+	$DATADIR/meddra_soc_allterms.txt \
+	$DATADIR/meddra_hlgt_allterms.txt \
+	$DATADIR/meddra_pt_allterms.txt \
+	$DATADIR/meddra_llt_allterms.txt \
 	; do
 	wc -l $f
 done
 #
 cat \
-	data/meddra_soc_allterms.txt \
-	data/meddra_hlgt_allterms.txt \
-	data/meddra_pt_allterms.txt \
-	data/meddra_llt_allterms.txt \
-	| ./ngram_dist.py
+	$DATADIR/meddra_soc_allterms.txt \
+	$DATADIR/meddra_hlgt_allterms.txt \
+	$DATADIR/meddra_pt_allterms.txt \
+	$DATADIR/meddra_llt_allterms.txt \
+	| ${cwd}/python/ngram_dist.py
 #

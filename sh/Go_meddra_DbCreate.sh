@@ -1,49 +1,55 @@
-#!/bin/sh
+#!/bin/bash
 #############################################################################
 #
 set -e
 #
+cwd=$(pwd)
+#
 DBNAME="meddra"
 DBVERSION="21.1"
-DATADIR="data"
+DATADIR="${cwd}/data"
+#
+if [ ! -e "$DATADIR" ]; then
+	mkdir $DATADIR
+fi
 #
 DBDIR=/home/data/MedDRA/${DBVERSION}/MedAscii
 #
 #
-./meddra_utils.py \
+${cwd}/python/meddra_utils.py \
 	--convert_soc \
 	--i $DBDIR/soc.asc --o $DATADIR/meddra_soc.tsv
-./meddra_utils.py \
+${cwd}/python/meddra_utils.py \
 	--convert_hlt \
 	--i $DBDIR/hlt.asc --o $DATADIR/meddra_hlt.tsv
-./meddra_utils.py \
+${cwd}/python/meddra_utils.py \
 	--convert_hlgt \
 	--i $DBDIR/hlgt.asc --o $DATADIR/meddra_hlgt.tsv
-./meddra_utils.py \
+${cwd}/python/meddra_utils.py \
 	--convert_pt \
 	--i $DBDIR/pt.asc --o $DATADIR/meddra_pt.tsv
-./meddra_utils.py \
+${cwd}/python/meddra_utils.py \
 	--convert_llt \
 	--i $DBDIR/llt.asc --o $DATADIR/meddra_llt.tsv
-./meddra_utils.py \
+${cwd}/python/meddra_utils.py \
 	--convert_llt2pt \
 	--i $DBDIR/llt.asc --o $DATADIR/meddra_pt2llt.tsv
-./meddra_utils.py \
+${cwd}/python/meddra_utils.py \
 	--convert_soc2hlgt \
 	--i $DBDIR/soc_hlgt.asc --o $DATADIR/meddra_soc2hlgt.tsv
-./meddra_utils.py \
+${cwd}/python/meddra_utils.py \
 	--convert_hlgt2hlt \
 	--i $DBDIR/hlgt_hlt.asc --o $DATADIR/meddra_hlgt2hlt.tsv
-./meddra_utils.py \
+${cwd}/python/meddra_utils.py \
 	--convert_hlt2pt \
 	--i $DBDIR/hlt_pt.asc --o $DATADIR/meddra_hlt2pt.tsv
-./meddra_utils.py \
+${cwd}/python/meddra_utils.py \
 	--convert_soc2intl \
 	--i $DBDIR/intl_ord.asc --o $DATADIR/meddra_intl.tsv
-./meddra_utils.py \
+${cwd}/python/meddra_utils.py \
 	--convert_smq_list \
 	--i $DBDIR/smq_list.asc --o $DATADIR/meddra_smq_list.tsv
-./meddra_utils.py \
+${cwd}/python/meddra_utils.py \
 	--convert_smq_content \
 	--i $DBDIR/smq_content.asc --o $DATADIR/meddra_smq_content.tsv
 #
@@ -72,7 +78,7 @@ for tsvfile in $tsvfiles ; do
 	tname=`echo $tsvfile |perl -pe 's/^.*meddra_(\S+)\.tsv/$1/;'`
 	printf "%s\n" $tname
 	#
-	csv2sql.py \
+	${cwd}/python/csv2sql.py \
 		--i $tsvfile \
 		--tsv \
 		--create \
@@ -81,7 +87,7 @@ for tsvfile in $tsvfiles ; do
 		--maxchar 2000 \
 		|psql -d $DBNAME
 	#
-	csv2sql.py \
+	${cwd}/python/csv2sql.py \
 		--i $tsvfile \
 		--tsv \
 		--tablename "$tname" \
