@@ -32,7 +32,7 @@ def ConvertSoc(fin, fout):
     line=re.sub('\$+$','', line)
     fields=re.split('\$', line)
     if len(fields)!=3:
-      logging.info( "Bad line: %s"%line)
+      logging.error("Bad line: %s"%line)
       continue
     soc_id=int(fields[0])
     txt=fields[1]
@@ -42,7 +42,7 @@ def ConvertSoc(fin, fout):
     fout.write("\t%s"%txt)
     fout.write("\t%s\n"%abr)
     n_lines+=1
-  logging.info( "lines: %d"%n_lines)
+  logging.info("lines: %d"%n_lines)
 
 #############################################################################
 def ConvertHlt(fin, fout):
@@ -57,17 +57,16 @@ def ConvertHlt(fin, fout):
     line=re.sub('\$+$', '', line)
     fields=re.split('\$', line)
     if len(fields)<2:
-      logging.info( "ERROR: Bad line: %s"%line)
+      logging.error("Bad line: %s"%line)
       continue
     elif len(fields)>2:
-      logging.info( "Warning: Non-compliant line: %s"%line)
-
+      logging.warning("Non-compliant line: %s"%line)
     hlt_id=int(fields[0])
     txt=fields[1]
     txt=re.sub(r'\t', ' ', txt)
     fout.write("%d\t%s\n"%(hlt_id, txt))
     n_lines+=1
-  logging.info( "lines: %d"%n_lines)
+  logging.info("lines: %d"%n_lines)
 
 #############################################################################
 def ConvertHlgt(fin, fout):
@@ -82,14 +81,14 @@ def ConvertHlgt(fin, fout):
     line=re.sub('\$+$', '', line)
     fields=re.split('\$', line)
     if len(fields)!=2:
-      logging.info( "Bad line: %s"%line)
+      logging.error("Bad line: %s"%line)
       continue
     soc_id=int(fields[0])
     txt=fields[1]
     txt=re.sub(r'\t', ' ', txt)
     fout.write('%d\t%s\n'%(soc_id, txt))
     n_lines+=1
-  logging.info( "lines: %d"%n_lines)
+  logging.info("lines: %d"%n_lines)
 
 #############################################################################
 def ConvertPt(fin, fout):
@@ -104,7 +103,7 @@ def ConvertPt(fin, fout):
     line=re.sub('\$+$', '', line)
     fields=re.split('\$', line)
     if len(fields)<2:
-      logging.info( "Bad line: %s"%line)
+      logging.error("Bad line: %s"%line)
       continue
     pt_id=int(fields[0])
     txt=fields[1]
@@ -126,7 +125,7 @@ def ConvertPt(fin, fout):
     fout.write("\t%s"%(icd9cm if icd9cm else ''))
     fout.write("\t%s\n"%(jart if jart else ''))
     n_lines+=1
-  logging.info( "lines: %d"%n_lines)
+  logging.info("lines: %d"%n_lines)
 
 #############################################################################
 def ConvertLlt(fin, fout):
@@ -141,7 +140,7 @@ def ConvertLlt(fin, fout):
     line=re.sub('\$+$', '', line)
     fields=re.split('\$', line)
     if len(fields)<2:
-      logging.info( "Bad line: %s"%line)
+      logging.error("Bad line: %s"%line)
       continue
     llt_id=int(fields[0])
     txt=fields[1]
@@ -162,7 +161,7 @@ def ConvertLlt(fin, fout):
     fout.write("\t%s"%(current if current else ''))
     fout.write("\t%s\n"%(jart if jart else ''))
     n_lines+=1
-  logging.info( "lines: %d"%n_lines)
+  logging.info("lines: %d"%n_lines)
 
 #############################################################################
 def ConvertLlt2pt(fin, fout):
@@ -177,14 +176,14 @@ def ConvertLlt2pt(fin, fout):
     line=re.sub('\$+$', '', line)
     fields=re.split('\$', line)
     if len(fields)<2:
-      logging.info( "Bad line: %s"%line)
+      logging.error("Bad line: %s"%line)
       continue
     llt_id=int(fields[0])
     pt=int(fields[2]) if len(fields)>2 else None
     if pt:
       fout.write("%d\t%d\n"%(pt, llt_id))
     n_lines+=1
-  logging.info( "lines: %d"%n_lines)
+  logging.info("lines: %d"%n_lines)
 
 #############################################################################
 def ConvertSoc2hlgt(fin, fout):
@@ -199,11 +198,11 @@ def ConvertSoc2hlgt(fin, fout):
     line=re.sub('\$+$', '', line)
     fields=re.split('\$', line)
     if len(fields)<2:
-      logging.info( "Bad line: %s"%line)
+      logging.error("Bad line: %s"%line)
       continue
     fout.write("%s\t%s\n"%(fields[0], fields[1]))
     n_lines+=1
-  logging.info( "lines: %d"%n_lines)
+  logging.info("lines: %d"%n_lines)
 
 #############################################################################
 def ConvertHlgt2Hlt(fin, fout):
@@ -218,11 +217,11 @@ def ConvertHlgt2Hlt(fin, fout):
     line=re.sub('\$+$', '', line)
     fields=re.split('\$', line)
     if len(fields)<2:
-      logging.info( "Bad line: %s"%line)
+      logging.error("Bad line: %s"%line)
       continue
     fout.write("%s\t%s\n"%(fields[0], fields[1]))
     n_lines+=1
-  logging.info( "lines: %d"%n_lines)
+  logging.info("lines: %d"%n_lines)
 
 #############################################################################
 def ConvertHlt2Pt(fin, fout):
@@ -237,11 +236,11 @@ def ConvertHlt2Pt(fin, fout):
     line=re.sub('\$+$', '', line)
     fields=re.split('\$', line)
     if len(fields)<2:
-      logging.info( "Bad line: %s"%line)
+      logging.error("Bad line: %s"%line)
       continue
     fout.write("%s\t%s\n"%(fields[0], fields[1]))
     n_lines+=1
-  logging.info( "lines: %d"%n_lines)
+  logging.info("lines: %d"%n_lines)
 
 #############################################################################
 def ConvertSoc2intl(fin, fout):
@@ -256,11 +255,11 @@ def ConvertSoc2intl(fin, fout):
     line=re.sub('\$+$', '', line)
     fields=re.split('\$', line)
     if len(fields)<2:
-      logging.info( "Bad line: %s"%line)
+      logging.error("Bad line: %s"%line)
       continue
     fout.write("%s\t%s\n"%(fields[0], fields[1]))
     n_lines+=1
-  logging.info( "lines: %d"%n_lines)
+  logging.info("lines: %d"%n_lines)
 
 #############################################################################
 def ConvertSmqlist(fin, fout):
@@ -278,7 +277,7 @@ def ConvertSmqlist(fin, fout):
     fields=re.split('\$', line)
     fout.write('\t'.join(fields)+'\n')
     n_lines+=1
-  logging.info( "lines: %d"%n_lines)
+  logging.info("lines: %d"%n_lines)
 
 #############################################################################
 def ConvertSmqcontent(fin, fout):
@@ -296,13 +295,10 @@ def ConvertSmqcontent(fin, fout):
     fields=re.split('\$', line)
     fout.write('\t'.join(fields)+'\n')
     n_lines+=1
-  logging.info( "lines: %d"%n_lines)
-
+  logging.info("lines: %d"%n_lines)
 
 #############################################################################
-###
-#Db functions:
-###
+### Db functions:
 #############################################################################
 def Connect():
   db = pg.connect(dbname='meddra', user='www', password='foobar')
@@ -310,56 +306,27 @@ def Connect():
   return db,cur
 
 #############################################################################
-def DescribeCounts():
-  outtxt=""
-  db,cur = Connect()
-  sql = ("select table_name from information_schema.tables where table_schema='public'")
-  cur.execute(sql)
-  rows = cur.fetchall()
-  outtxt+=("tables:\n")
-  for row in rows:
-    tablename = row[0]
-    sql = ("select count(*) from %s"%tablename)
-    cur.execute(sql)
-    rows = cur.fetchall()
-    outtxt+="count(%s): %d\n"%(tablename, rows[0][0])
-  cur.close()
-  db.close()
-  return outtxt
-  
-#############################################################################
 def DescribeDB():
-  outtxt = DescribeCounts()
+  outtxt="";
   db,cur = Connect()
-  sql = ("select table_name from information_schema.tables where table_schema='public'")
+  sql = ("SELECT table_name FROM information_schema.tables WHERE table_schema='public'")
   cur.execute(sql)
   rows = cur.fetchall()
   for row in rows:
     tablename = row[0]
-    sql = ("select column_name,data_type from information_schema.columns where table_name = '%s'"%tablename)
+    sql = ("SELECT COUNT(*) FROM %s"%tablename)
     cur.execute(sql)
     rows = cur.fetchall()
     outtxt+=("table: %s\n"%tablename)
-    for row in rows:
-      outtxt+=("\t%s\n"%str(row))
+    outtxt+="\tROWCOUNT: %6d\n"%(rows[0][0])
+    sql = ("SELECT column_name,data_type FROM information_schema.columns WHERE table_name = '%s'"%tablename)
+    cur.execute(sql)
+    rows = cur.fetchall()
+    for j,row in enumerate(rows):
+      outtxt+=("\t%d. %-12s (%s)\n"%(j+1, row[0], row[1]))
   cur.close()
   db.close()
   return outtxt
-
-#############################################################################
-def GetMetadata():
-  ver,desc,ts = (None,None,None)
-  db,cur = Connect()
-  sql=("select db_version,db_description,db_date_built from metadata")
-  cur.execute(sql)
-  rows=cur.fetchall()
-  if rows and len(rows[0])>2:
-    ver=rows[0][0]
-    desc=rows[0][1]
-    ts=rows[0][2]
-  cur.close()
-  db.close()
-  return ver,desc,ts
 
 #############################################################################
 def SocID2HlgtIDs(socid):
@@ -415,10 +382,6 @@ if __name__=='__main__':
 
   if args.op=="dbdescribe":
     print(DescribeDB())
-    ver,desc,ts = GetMetadata()
-    print("Version:", ver)
-    print("Description:", desc)
-    print("Timestamp:", ts)
     sys.exit()
 
   if not fin: parser.error('Input file required.')
