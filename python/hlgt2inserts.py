@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 ### hlgt2inserts.py -- MedDRA raw input; PostgreSQL output.
 ### Jeremy Yang
 

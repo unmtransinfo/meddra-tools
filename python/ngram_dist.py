@@ -1,8 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 #############################################################################
 # ngram_dist.py - word count distribution
 # Jeremy J Yang
-#  8 Apr 2011
 #############################################################################
 import os,sys,re
 

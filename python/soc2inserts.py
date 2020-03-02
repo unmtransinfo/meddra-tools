@@ -1,6 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 ### soc2inserts.py -- MedDRA raw input; PostgreSQL output.
-### Jeremy Yang
 
 import sys,os,re
 

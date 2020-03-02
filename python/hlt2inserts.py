@@ -1,13 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 #############################################################################
 ### hlt2inserts.py -- MedDRA raw input; PostgreSQL output.
 ###
 ### In 14.1 there is one non-compliant line:
 ###	hlt.asc:10030209$Oesophageal varices$1036001$$HEM ESOPH$$$$$
 ### What are the 3rd/4th fields?  1036001 not present in any other .asc file.  What is "HEM ESOPH"?
-###
-### Jeremy Yang
-### 26 Oct 2011
 #############################################################################
 import sys,os,re
 

@@ -1,12 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 #############################################################################
 ### llt2inserts.py -- MedDRA raw input; PostgreSQL output.
 ### 
 ### Revised for MedDRA 14.0.
 ### Relies on format of raw ascii files.
-### 
-### Jeremy Yang
-### 29 Mar 2011
 #############################################################################
 import sys,os,re
 

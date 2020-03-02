@@ -1,11 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 #############################################################################
 ### pt2inserts.py -- MedDRA raw input; PostgreSQL output.
 ###
 ### Relies on raw ascii format.
 ### OK for MedDRA 13.0 and 14.0.
-### Jeremy Yang
-### 29 Mar 2011
 #############################################################################
 import sys,os,re
 

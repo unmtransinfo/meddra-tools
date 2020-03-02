@@ -1,101 +1,72 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #############################################################################
 ### csv2sql.py - Convert CSV to INSERTS for a specified table, with
 ### control over column names, datatypes, and database systems (dbsystem).
-###
-### Jeremy Yang
-###  19 Jun 2017
 #############################################################################
-import sys,os,getopt,re,codecs,gzip,csv
-
+import sys,os,argparse,re,gzip,csv,logging
+#
 PROG=os.path.basename(sys.argv[0])
 #
-DBSYSTEMS=['postgres','mysql','oracle','derby']
-#
-KEYWORDS=['procedure', 'function', 'column', 'table']
-#
-MAXCHAR=1024
-#
-CHARTYPES=('CHAR','CHARACTER','VARCHAR','TEXT')
-NUMTYPES=('INT','BIGINT','FLOAT','NUM')
-TIMETYPES=('DATE','TIMESTAMP')
-#
-NULLWORDS=['NULL','UNSPECIFIED','MISSING','UNKNOWN','NA']
-#
-#
 #############################################################################
-def CsvCheck(fin,dbsystem,noheader,maxchar,delim,qc,verbose):
-  csvReader=csv.reader(fin,dialect='excel',delimiter=delim,quotechar=qc) 
-  colnames=None
-  n_in=0; n_err=0;
-  while True:
-    try:
-      row=csvReader.next()
-      n_in+=1
-    except Exception,e:
-      print >>sys.stderr, '%s'%str(e)
-      break
+def CsvCheck(fin, dbsystem, noheader, maxchar, delim, qc, keywords):
+  csvReader=csv.reader(fin, dialect='excel', delimiter=delim, quotechar=qc) 
+  colnames=None; n_in=0; n_err=0;
+  for row in csvReader:
+    n_in+=1
     if n_in==1 or not colnames:
       if noheader:
-        prefix = re.sub(r'\..*$','',os.path.basename(fin.name))
-        colnames = ['%s_%d'%(prefix,j) for j in range(1,1+len(row))]
+        prefix = re.sub(r'\..*$','', os.path.basename(fin.name))
+        colnames = ['%s_%d'%(prefix, j) for j in range(1, 1+len(row))]
       else:
-        colnames = row[:]
-      colnames_clean = CleanNames(colnames[:],'')
+        colnames = csvReader.fieldnames[:]
+      colnames_clean = CleanNames(colnames, '', keywords)
       DedupNames(colnames_clean)
-      if verbose:
-        for j in range(len(colnames)):
-          tag = colnames[j]
-          tag_clean = colnames_clean[j]
-          print >>sys.stderr, 'column tag %d: %24s%s'%(j+1,tag,(' -> %s'%tag_clean if tag_clean!=tag else ''))
+      for j in range(len(colnames)):
+        tag = colnames[j]
+        tag_clean = colnames_clean[j]
+        logging.debug('column tag %d: %24s%s'%(j+1, tag, (' -> %s'%tag_clean if tag_clean!=tag else '')))
       nval = {colname:0 for colname in colnames}
       maxlen = {colname:0 for colname in colnames}
-
     for j in range(len(row)):
-      val=row[j]
+      val = list(row.values())[j]
       if j<=len(colnames):
         colname = colnames[j]
       else:
-        print >>sys.stderr,'ERROR [%d] row j_col>len(colnames) %d>%d'%(n_in,j,len(colnames))
+        logging.error('[%d] row j_col>len(colnames) %d>%d'%(n_in, j, len(colnames)))
         n_err+=1
       try:
-        val=val.encode('ascii','replace')
-      except Exception,e:
-        print >>sys.stderr,'ERROR [%d] %s'%(n_in,str(e))
+        if type(val) is str:
+          val = val.encode('ascii', 'replace')
+      except Exception as e:
+        logging.error('[%d] %s'%(n_in, str(e)))
         val='%s:ENCODING_ERROR'%PROG
         n_err+=1
-
       if val.strip(): nval[colname]+=1
-      val = EscapeString(val,False,dbsystem)
-
-      maxlen[colname] = max(maxlen[colname],len(val))
-
+      val = EscapeString(val, False, dbsystem)
+      maxlen[colname] = max(maxlen[colname], len(val))
       if len(val)>maxchar:
-        if verbose: print >>sys.stderr, 'WARNING: [%d] len>MAX (%d>%d)'%(n_in,len(val),maxchar)
+        logging.debug('WARNING: [%d] len>MAX (%d>%d)'%(n_in, len(val), maxchar))
         val=val[:maxchar]
-
   for j,tag in enumerate(colnames):
-    print >>sys.stderr,'%d. "%24s":\tnval = %6d\tmaxlen = %6d'%(j+1,tag,nval[tag],maxlen[tag])
-
-  print >>sys.stderr, "n_in: %d"%(n_in)
-  print >>sys.stderr, "n_err: %d"%(n_err)
+    logging.info('%d. "%24s":\tnval = %6d\tmaxlen = %6d'%(j+1, tag, nval[tag], maxlen[tag]))
+  logging.info("n_in: %d; n_err: %d"%(n_in, n_err))
 
 #############################################################################
-def Csv2Create(fin,fout,dbsystem,dtypes,schema,tablename,colnames,prefix,noheader,coltypes,fixtags,delim,qc,verbose):
-  csvReader=csv.DictReader(fin,fieldnames=None,dialect='excel',delimiter=delim,quotechar=qc) 
+def Csv2Create(fin, fout, dbsystem, dtypes, schema, tablename, colnames, coltypes, prefix, noheader, fixtags, delim, qc, keywords):
+  csvReader=csv.DictReader(fin, fieldnames=None, dialect='excel', delimiter=delim, quotechar=qc) 
   if colnames:
     if len(colnames) != len(csvReader.fieldnames):
-      print >>sys.stderr, 'ERROR: #colnames)!=#fieldnames (%d!=%d)'%(len(colnames),len(csvReader.fieldnames))
+      logging.error('#colnames)!=#fieldnames (%d!=%d)'%(len(colnames), len(csvReader.fieldnames)))
       return
     csvReader.fieldnames = colnames
   else:
     colnames = csvReader.fieldnames[:]
     if fixtags:
-      CleanNames(colnames,prefix)
+      CleanNames(colnames, prefix, keywords)
       DedupNames(colnames)
   if coltypes:
     if len(coltypes) != len(csvReader.fieldnames):
-      print >>sys.stderr, 'ERROR: #coltypes!=#fieldnames (%d!=%d)'%(len(coltypes),len(csvReader.fieldnames))
+      logging.error('#coltypes!=#fieldnames (%d!=%d)'%(len(coltypes), len(csvReader.fieldnames)))
       return
     for j in range(len(coltypes)):
       if not coltypes[j]: coltypes[j] = 'CHAR'
@@ -104,80 +75,68 @@ def Csv2Create(fin,fout,dbsystem,dtypes,schema,tablename,colnames,prefix,noheade
   if dbsystem=='mysql':
     sql='CREATE TABLE %s (\n\t'%(tablename)
   else:
-    sql='CREATE TABLE %s.%s (\n\t'%(schema,tablename)
+    sql='CREATE TABLE %s.%s (\n\t'%(schema, tablename)
   sql+=(',\n\t'.join(('%s %s'%(colnames[j],dtypes[dbsystem][coltypes[j]])) for j in range(len(colnames))))
   sql+=('\n);')
   if dbsystem=='postgres':
-    sql+="\nCOMMENT ON TABLE %s.%s IS 'Created by %s.';"%(schema,tablename,PROG)
+    sql+="\nCOMMENT ON TABLE %s.%s IS 'Created by %s.';"%(schema, tablename, PROG)
   fout.write(sql+'\n')
-  print >>sys.stderr, "%s: output SQL CREATE written, columns: %d"%(PROG,len(colnames))
-  return colnames
+  logging.info("%s: output SQL CREATE written, columns: %d"%(tablename, len(colnames)))
 
 #############################################################################
-def Csv2Insert(fin,fout,dbsystem,dtypes,schema,tablename,colnames,prefix,noheader,coltypes,nullify,fixtags,maxchar,delim,qc,skip,nmax,verbose):
+def Csv2Insert(fin, fout, dbsystem, dtypes, schema, tablename, colnames, coltypes, prefix, noheader, nullwords, nullify, fixtags, maxchar, chartypes, numtypes, timetypes, delim, qc, keywords, skip, nmax):
   n_in=0; n_out=0; n_err=0;
-  csvReader=csv.DictReader(fin,fieldnames=None,dialect='excel',delimiter=delim,quotechar=qc) 
+  csvReader=csv.DictReader(fin, fieldnames=None, dialect='excel', delimiter=delim, quotechar=qc) 
   if colnames:
     if len(colnames) != len(csvReader.fieldnames):
-      print >>sys.stderr, 'ERROR: #colnames!=#fieldnames (%d!=%d)'%(len(colnames),len(csvReader.fieldnames))
+      logging.error('#colnames!=#fieldnames (%d!=%d)'%(len(colnames), len(csvReader.fieldnames)))
       return
     csvReader.fieldnames = colnames
   else:
     colnames = csvReader.fieldnames[:]
     if fixtags:
-      CleanNames(colnames,prefix)
+      CleanNames(colnames, prefix, keywords)
       DedupNames(colnames)
   if coltypes:
     if len(coltypes) != len(csvReader.fieldnames):
-      print >>sys.stderr, 'ERROR: #coltypes!=$fieldnames (%d!=%d)'%(len(coltypes),len(csvReader.fieldnames))
+      logging.error('#coltypes!=$fieldnames (%d!=%d)'%(len(coltypes), len(csvReader.fieldnames)))
       return
   else:
     coltypes = [dtypes['deftype'] for i in range(len(colnames))]
   for j in range(len(coltypes)):
     if not coltypes[j]: coltypes[j]=dtypes['deftype']
-  while True:
-    try:
-      row=csvReader.next()
-      n_in+=1
-    except Exception,e:
-      print >>sys.stderr, '%s'%str(e)
-      break
+  for row in csvReader:
+    n_in+=1
     if n_in<=skip: continue
     if dbsystem=='mysql':
-      line = ('INSERT INTO %s (%s) VALUES ('%(tablename,','.join(colnames)))
+      line = ('INSERT INTO %s (%s) VALUES ('%(tablename, ','.join(colnames)))
     else:
-      line = ('INSERT INTO %s.%s (%s) VALUES ('%(schema,tablename,','.join(colnames)))
+      line = ('INSERT INTO %s.%s (%s) VALUES ('%(schema, tablename, ','.join(colnames)))
     for j,colname in enumerate(csvReader.fieldnames):
-      val=row[colname]
-      try:
-        #val=codecs.encode(val,'ascii','replace') #same
-        val=val.encode('ascii','replace')
-      except Exception,e:
-        print >>sys.stderr,'%s'%str(e)
-        val='%s:ENCODING_ERROR'%PROG
-      if coltypes[j].upper() in CHARTYPES:
-        val = EscapeString(val,nullify,dbsystem)
+      val = str(row[colname])
+      #logging.debug("%s: '%s'"%(colname, val))
+      if coltypes[j].upper() in chartypes:
+        val = EscapeString(str(val), nullify, dbsystem)
         if len(val)>maxchar:
-          val=val[:maxchar]
-          print >>sys.stderr, 'WARNING: [row=%d] string truncated to %d chars: "%s"'%(n_in,maxchar,val)
+          val = val[:maxchar]
+          logging.info('WARNING: [row=%d] string truncated to %d chars: "%s"'%(n_in, maxchar, val))
         val = ("'%s'"%val)
-      elif coltypes[j].upper() in NUMTYPES:
-        val = 'NULL' if (val.upper() in NULLWORDS or val=='') else ('%s'%val)
-      elif coltypes[j].upper() in TIMETYPES:
+      elif coltypes[j].upper() in numtypes:
+        val = 'NULL' if (val.upper() in nullwords or val=='') else ('%s'%val)
+      elif coltypes[j].upper() in timetypes:
         val = ("to_timestamp('%s')"%val)
       else:
-        print >>sys.stderr, 'ERROR: no type specified or implied: (col=%d)'%(j+1)
+        logging.error('No type specified or implied: (col=%d)'%(j+1))
         continue
       line+=('%s%s'%((',' if j>0 else ''),val))
     line +=(') ;')
     fout.write(line+'\n')
     n_out+=1
     if n_in==nmax: break
-  print >>sys.stderr, "%s: input CSV lines: %d"%(PROG,n_in)
-  print >>sys.stderr, "%s: output SQL inserts: %d"%(PROG,n_out)
+  logging.info("%s: input CSV lines: %d; output SQL inserts: %d"%(tablename, n_in, n_out))
 
 #############################################################################
-def CleanName(name):
+def CleanName(name, keywords):
   '''Clean table or col name for use without escaping.
 1. Downcase.
 2. Replace spaces and colons with underscores.
@@ -190,14 +149,14 @@ def CleanName(name):
   name = re.sub(r'[^\w]','',name)
   name = re.sub(r'^([\d])',r'col_\1',name)
   name = name[:50]
-  if name in KEYWORDS:
+  if name in keywords:
     name+='_name'
   return name
 
 #############################################################################
-def CleanNames(colnames,prefix):
+def CleanNames(colnames, prefix, keywords):
   for j in range(len(colnames)):
-    colnames[j] = CleanName(prefix+colnames[j] if prefix else colnames[j])
+    colnames[j] = CleanName(prefix+colnames[j] if prefix else colnames[j], keywords)
   return colnames
 
 #############################################################################
@@ -209,171 +168,101 @@ def DedupNames(colnames):
       k=1
       while colnames[j] in unames:
         k+=1
-        colnames[j] = '%s_%d'%(colname_orig,k)
+        colnames[j] = '%s_%d'%(colname_orig, k)
     unames.add(colnames[j])
   return colnames
 
 #############################################################################
-def EscapeString(val,nullify,dbsystem):
-  val=re.sub(r"'",'',val)
+def EscapeString(val, nullify, dbsystem):
+  val=re.sub(r"'", '', val)
   if dbsystem=='postgres':
-    val=re.sub(r'\\',r"'||E'\\\\'||'",val)
+    val=re.sub(r'\\', r"'||E'\\\\'||'", val)
   elif dbsystem=='mysql':
-    val=re.sub(r'\\',r'\\\\',val)
+    val=re.sub(r'\\', r'\\\\', val)
   if val.strip()=='' and nullify: val='NULL'
   return val
 
 #############################################################################
 if __name__=='__main__':
-  schema='public';
-  dbsystem='postgres';
-  quotechar='"';
-  deftype='CHAR';
-  usage='''
-  %(PROG)s - CSV to SQL CREATEs or INSERTs
+  DBSYSTEMS=['postgres', 'mysql', 'oracle', 'derby']; DBSYSTEM='postgres';
+  KEYWORDS='procedure,function,column,table'
+  MAXCHAR=1024
+  CHARTYPES = 'CHAR,CHARACTER,VARCHAR,TEXT'
+  NUMTYPES = 'INT,BIGINT,FLOAT,NUM'
+  DEFTYPE='CHAR';
+  TIMETYPES = 'DATE,TIMESTAMP'
+  NULLWORDS = "NULL,UNSPECIFIED,MISSING,UNKNOWN,NA"
+  SCHEMA='public';
+  QUOTECHAR='"';
 
-operations:
-	--insert ..................... output INSERT statements
-	--create ..................... output CREATE statements
-	--check ...................... check input file, profile columns
-options:
-	--i INFILE ................... input CSV [stdin]
-	--o OUTFILE .................. output SQL INSERTs [stdout]
-	--schema SCHEMA .............. (Postgres schema, or MySql db) [%(SCHEMA)s]
-	--tablename TABLE ............ table [convert filename]
-	--prefix_tablename PREFIX .... prefix + [convert filename]
-	--dbsystem DBSYSTEM .......... %(DBSYSTEMS)s [%(DBSYSTEM)s]
-	--colnames COLNAMES .......... comma-separated [default: CSV tags]
-	--noheader .............. auto-name columns
-	--prefix_colnames PREFIX ..... prefix CSV tags
-	--coltypes COLTYPES .......... comma-separated, CHAR|INT|FLOAT|NUM|BOOL [default: all CHAR]
-	--nullify .................... CSV missing CHAR value converts to NULL
-	--nullwords NULLWORDS ........ words synonymous with NULL [%(NULLWORDS)s]
-	--maxchar MAXCHAR ............ max string length [%(MAXCHAR)s]
-	--fixtags .................... tags to colnames (downcase/nopunct/nospace)
-	--tsv ........................ input file TSV
-	--igz ........................ input file GZ
-	--delim DELIM ................ use if not comma or tab
-	--default_type DEFTYPE ....... [%(DEFTYPE)s]
-	--quotechar C ................ [%(QUOTECHAR)s]
-	--skip N ..................... skip N records (--insert only)
-	--nmax N ..................... max N records (--insert only)
-	--v .......................... verbose
-	--h .......................... this help
-'''%{	'PROG':PROG,
-	'DBSYSTEMS':('|'.join(DBSYSTEMS)),
-	'DBSYSTEM':dbsystem,
-	'MAXCHAR':MAXCHAR,
-	'QUOTECHAR':quotechar,
-	'NULLWORDS':(','.join(NULLWORDS)),
-	'DEFTYPE':deftype,
-	'SCHEMA':schema
-	}
+  parser = argparse.ArgumentParser(description="CSV to SQL CREATEs or INSERTs", epilog='')
+  ops = [
+	"insert", # output INSERT statements
+	"create", # output CREATE statements
+	"check"] # check input file, profile columns
 
-  def ErrorExit(msg):
-    print >>sys.stderr,msg
-    sys.exit(1)
+  parser.add_argument("op", choices=ops, help='operation')
+  parser.add_argument("--i", dest="ifile", help="input file (CSV|TSV) [stdin]")
+  parser.add_argument("--o", dest="ofile", help="output SQL INSERTs [stdout]")
+  parser.add_argument("--schema", default=SCHEMA, help="(Postgres schema, or MySql db)")
+  parser.add_argument("--tablename", help="table [convert filename]")
+  parser.add_argument("--prefix_tablename", help="prefix + [convert filename]")
+  parser.add_argument("--dbsystem", default=DBSYSTEM, help="")
+  parser.add_argument("--colnames", help="comma-separated [default: CSV tags]")
+  parser.add_argument("--noheader", action="store_true", help="auto-name columns")
+  parser.add_argument("--prefix_colnames", help="prefix CSV tags")
+  parser.add_argument("--coltypes", help="comma-separated [default: all CHAR]")
+  parser.add_argument("--nullify", action="store_true", help="CSV missing CHAR value converts to NULL")
+  parser.add_argument("--nullwords", default=NULLWORDS, help="words synonymous with NULL (comma-separated list)")
+  parser.add_argument("--keywords", default=KEYWORDS, help="keywords, disallowed tablenames (comma-separated list)")
+  parser.add_argument("--char_types", default=CHARTYPES, help="character types (comma-separated list)")
+  parser.add_argument("--num_types", default=NUMTYPES, help="numeric types (comma-separated list)")
+  parser.add_argument("--time_types", default=TIMETYPES, help="time types (comma-separated list)")
+  parser.add_argument("--maxchar", type=int, default=MAXCHAR, help="max string length")
+  parser.add_argument("--fixtags", action="store_true", help="tags to colnames (downcase/nopunct/nospace)")
+  parser.add_argument("--tsv", action="store_true", help="input file TSV")
+  parser.add_argument("--igz", action="store_true", help="input file GZ")
+  parser.add_argument("--delim", default=",", help="use if not comma or tab")
+  parser.add_argument("--default_type", default=DEFTYPE, help="")
+  parser.add_argument("--quotechar", default=QUOTECHAR, help="")
+  parser.add_argument("--skip", type=int, default=0, help="skip N records (--insert only)")
+  parser.add_argument("--nmax", type=int, default=0, help="max N records (--insert only)")
+  parser.add_argument("-v", "--verbose", default=0, action="count")
+  args = parser.parse_args()
 
-  check=False;
-  insert=False;
-  create=False;
-  igz=False;
-  delim=',';
-  tablename=None;
-  prefix_tablename='';
-  ifile=None; ofile=None; 
-  verbose=0;
-  nmax=0;
-  skip=0;
-  colnames=None;
-  prefix_colnames=None;
-  coltypes=None;
-  fixtags=False;
-  noheader=False;
-  nullify=False;
-  nullwords=None;
-  opts,pargs = getopt.getopt(sys.argv[1:],'',['h','v','vv',
-	'i=','o=',
-	'dbsystem=',
-	'maxchar=',
-	'tsv',
-	'igz',
-	'nullify',
-	'nullwords=',
-	'fixtags',
-	'noheader',
-	'insert',
-	'check',
-	'create',
-	'prefix_colnames=',
-	'colnames=',
-	'coltypes=',
-	'delim=',
-	'quotechar=',
-	'deftype=',
-	'schema=',
-	'tablename=',
-	'prefix_tablename=',
-	'nmax=',
-	'skip='
-	])
-  if not opts: ErrorExit(usage)
-  for (opt,val) in opts:
-    if opt=='--h': ErrorExit(usage)
-    elif opt=='--i': ifile=val
-    elif opt=='--o': ofile=val
-    elif opt=='--insert': insert=True
-    elif opt=='--check': check=True
-    elif opt=='--create': create=True
-    elif opt=='--tablename': tablename=val
-    elif opt=='--prefix_tablename': prefix_tablename=val
-    elif opt=='--schema': schema=val
-    elif opt=='--dbsystem': dbsystem=val
-    elif opt=='--maxchar': MAXCHAR=int(val)
-    elif opt=='--colnames': colnames=re.split(r'[\s,]',val)
-    elif opt=='--prefix_colnames': prefix_colnames=val
-    elif opt=='--coltypes': coltypes=re.split(r'[\s,]',val)
-    elif opt=='--tsv': delim='\t'
-    elif opt=='--igz': igz=True
-    elif opt=='--delim': delim=val
-    elif opt=='--deftype': deftype=val
-    elif opt=='--quotechar': quotechar=val
-    elif opt=='--nullify': nullify=True
-    elif opt=='--nullwords': NULLWORDS=re.split(r'[\s,]',val)
-    elif opt=='--fixtags': fixtags=True
-    elif opt=='--noheader': noheader=True
-    elif opt=='--v': verbose=1
-    elif opt=='--nmax': nmax=int(val)
-    elif opt=='--skip': skip=int(val)
-    else: ErrorExit('Illegal option: %s'%val)
+  logging.basicConfig(format='%(levelname)s:%(message)s', level=(logging.DEBUG if args.verbose>1 else logging.INFO))
 
-  if ifile:
-    fin = gzip.open(ifile) if igz else file(ifile)
-    if not fin:
-      ErrorExit('ERROR: cannot open %s'%ifile)
+  if args.tsv: DELIM='\t'
+  else: DELIM = args.delim
+
+  NULLWORDS = re.split(r'[\s,]', args.nullwords)
+  KEYWORDS = re.split(r'[\s,]', args.keywords)
+  CHARTYPES = re.split(r'[\s,]', args.char_types)
+  NUMTYPES = re.split(r'[\s,]', args.num_types)
+  TIMETYPES = re.split(r'[\s,]', args.time_types)
+
+  if args.ifile:
+    fin = gzip.open(args.ifile) if args.igz else open(args.ifile)
   else:
     fin = sys.stdin
 
-  if ofile:
-    fout=open(ofile,'w')
-    #fout=codecs.open(ofile,'w','UTF-8','replace')
+  if args.ofile:
+    fout = open(args.ofile,'w')
   else:
-    fout=sys.stdout
-    #fout=codecs.getwriter('UTF-8')(sys.stdout,errors='replace')
-  if not fout:
-    ErrorExit('ERROR: cannot open %s'%ofile)
+    fout = sys.stdout
 
-  if not tablename:
-    if not ifile: ErrorExit('ERROR: --tablename or --i required.')
-    tablename = CleanName(prefix_tablename+re.sub(r'\..*$','',os.path.basename(ifile)))
-    if verbose:
-      print >>sys.stderr, 'tablename = "%s"'%tablename
+  if args.tablename:
+    TABLENAME = args.tablename
+  else:
+    if not args.ifile: parser.error('--tablename or --i required.')
+    TABLENAME = CleanName(args.prefix_tablename+re.sub(r'\..*$','', os.path.basename(args.ifile)), KEYWORDS)
+    logging.debug('tablename = "%s"'%TABLENAME)
 
-  DTYPES={
+  DTYPES = {
 	'postgres': {
-		'CHAR':'VARCHAR(%d)'%MAXCHAR,
-		'CHARACTER':'VARCHAR(%d)'%MAXCHAR,
-		'VARCHAR':'VARCHAR(%d)'%MAXCHAR,
+		'CHAR':'VARCHAR(%d)'%args.maxchar,
+		'CHARACTER':'VARCHAR(%d)'%args.maxchar,
+		'VARCHAR':'VARCHAR(%d)'%args.maxchar,
 		'INT':'INTEGER',
 		'BIGINT':'BIGINT',
 		'FLOAT':'FLOAT',
@@ -381,9 +270,9 @@ options:
 		'BOOL':'BOOLEAN'
 		},
 	'mysql': {
-		'CHAR':'TEXT(%d)'%MAXCHAR,
-		'CHARACTER':'TEXT(%d)'%MAXCHAR,
-		'VARCHAR':'TEXT(%d)'%MAXCHAR,
+		'CHAR':'TEXT(%d)'%args.maxchar,
+		'CHARACTER':'TEXT(%d)'%args.maxchar,
+		'VARCHAR':'TEXT(%d)'%args.maxchar,
 		'INT':'INTEGER',
 		'BIGINT':'BIGINT',
 		'FLOAT':'FLOAT',
@@ -391,18 +280,34 @@ options:
 		'BOOL':'BOOLEAN'
 		}
 	}
-  DTYPES['deftype']=deftype
+  DTYPES['deftype'] = args.default_type
   
 
-  if insert:
-    Csv2Insert(fin,fout,dbsystem,DTYPES,schema,tablename,colnames,prefix_colnames,noheader,coltypes,nullify,fixtags,MAXCHAR,delim,quotechar,skip,nmax,verbose)
+  if args.op=="create":
+    Csv2Create(fin, fout, args.dbsystem,
+	DTYPES,
+	args.schema,
+	TABLENAME,
+	re.split(r'[,\s]+', args.colnames) if args.colnames else None,
+	re.split(r'[,\s]+', args.coltypes) if args.coltypes else None,
+	args.prefix_colnames, args.noheader, args.fixtags, DELIM, args.quotechar,
+	KEYWORDS)
 
-  elif create:
-    Csv2Create(fin,fout,dbsystem,DTYPES,schema,tablename,colnames,prefix_colnames,noheader,coltypes,fixtags,delim,quotechar,verbose)
+  elif args.op=="insert":
+    Csv2Insert(fin, fout, args.dbsystem,
+	DTYPES,
+	args.schema,
+	TABLENAME,
+	re.split(r'[,\s]+', args.colnames) if args.colnames else None,
+	re.split(r'[,\s]+', args.coltypes) if args.coltypes else None,
+	args.prefix_colnames, args.noheader,
+	NULLWORDS, args.nullify, args.fixtags, args.maxchar,
+	CHARTYPES, NUMTYPES, TIMETYPES,
+	DELIM, args.quotechar, KEYWORDS, args.skip, args.nmax)
 
-  elif check:
-    CsvCheck(fin,dbsystem,noheader,MAXCHAR,delim,quotechar,verbose)
+  elif args.op=="check":
+    CsvCheck(fin, args.dbsystem, args.noheader, args.maxchar, DELIM, args.quotechar, KEYWORDS)
 
   else:
-    ErrorExit('ERROR: no operation specified.\n'+usage)
+    parser.error('Invalid operation: %s'%args.op)
 

@@ -1,17 +1,15 @@
 # MedDRA Tools
 
+Includes scripts and code to build local PostgreSql db from raw MedDRA files.
+
+* <https://meddra.com/>
+* MedDRA is regularly updated, &gt;1/year.
+* Latest at time of this writing: v23.0 (March 2020).
+
+(Download credentials required, via MedDRA subscription.)
+
 MedDRA = Medical Dictionary for Regulatory Activities
-
-https://meddra.com/
-=============================================================================
-
-Organization Name: University of New Mexico
-MedDRA ID:21885
-
-=============================================================================
-
 MSSO = Maintenance and Support Services Organization
-
 COSTAR(T) = Computer-Stored Ambulatory Record (Term)
 
 Hierarchy of terms (descending order):
@@ -22,8 +20,8 @@ Hierarchy of terms (descending order):
 	PT = Preferred Term
 	LLT = Lowest Level Term
 
-
 System Organ Classes:
+
 	Blood and lymphatic system disorders
 	Cardiac disorders
 	Congenital, familial and genetic disorders
