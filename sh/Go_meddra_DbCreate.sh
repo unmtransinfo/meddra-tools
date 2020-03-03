@@ -81,3 +81,9 @@ psql -d $DBNAME -c "COMMENT ON TABLE pt IS 'MedDRA: Preferred Term (PT)'";
 #
 psql -d $DBNAME -c "UPDATE soc SET text = NULL WHERE text = ''";
 #
+###
+# How to dump and restore:
+# pg_dump --no-privileges -Fc -d ${DBNAME} >${DBNAME}.pgdump
+# createdb ${DBNAME} ; pg_restore -e -O -x -d ${DBNAME} ${DBNAME}.pgdump
+###
+

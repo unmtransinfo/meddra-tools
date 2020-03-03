@@ -48,6 +48,7 @@ System Organ Classes:
 	Social circumstances
 	Surgical and medical procedures
 	Vascular disorders
+	Product issues
 
 
 Each term has a code, which are specified in the files hlgt.asc, hlt.asc,
