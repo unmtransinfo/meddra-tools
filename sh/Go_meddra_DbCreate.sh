@@ -5,8 +5,8 @@ set -e
 #
 cwd=$(pwd)
 #
-DBNAME="meddra"
-DBVERSION="23.0"
+DBVERSION="24.0"
+DBNAME="meddra_$(echo $DBVERSION |sed 's/\.//g')"
 DATADIR="${cwd}/data"
 #
 if [ ! -e "$DATADIR" ]; then
@@ -45,13 +45,14 @@ $DATADIR/meddra_smq_list.tsv \
 $DATADIR/meddra_smq_content.tsv \
 "
 #
+psql -c "DROP DATABASE IF EXISTS $DBNAME"
 psql -c "CREATE DATABASE $DBNAME"
 #
 psql -d $DBNAME -c "COMMENT ON DATABASE $DBNAME IS 'MedDRA: Medical Dictionary for Regulatory Activities (v${DBVERSION})'";
 #
 for tsvfile in $tsvfiles ; do
 	#
-	tname=`echo $tsvfile |perl -pe 's/^.*meddra_(\S+)\.tsv/$1/;'`
+	tname=$(echo $tsvfile |perl -pe 's/^.*meddra_(\S+)\.tsv/$1/;')
 	printf "%s\n" $tname
 	#
 	${cwd}/python/csv2sql.py create \
