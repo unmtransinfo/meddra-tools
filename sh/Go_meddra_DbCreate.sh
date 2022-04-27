@@ -60,8 +60,9 @@ psql -d $DBNAME -c "COMMENT ON DATABASE $DBNAME IS 'MedDRA: Medical Dictionary f
 i_table="0"
 for tsvfile in $tsvfiles ; do
 	i_table=$[$i + 1]
+	n_lines=$(cat $tsvfile |wc -l)
 	tname=$(echo $tsvfile |perl -pe 's/^.*meddra_(\S+)\.tsv/$1/;')
-	printf "${i_table}. CREATING AND LOADING: ${tname}\n"
+	printf "${i_table}. CREATING AND LOADING TABLE: ${tname} FROM INPUT FILE: ${tsvfile} (${n_lines} lines)\n"
 	#
 	${cwd}/python/csv2sql.py create --fixtags --maxchar 2000 \
 		--i $tsvfile --tsv --tablename "$tname" \
@@ -72,6 +73,7 @@ for tsvfile in $tsvfiles ; do
 		|psql -q -d $DBNAME
 	#
 done
+printf "TABLES CREATED AND LOADED: ${i_table}\n"
 #
 ###
 psql -d $DBNAME -c "COMMENT ON TABLE soc IS 'MedDRA: System Organ Class (SOC)'";
