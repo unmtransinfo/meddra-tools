@@ -4,7 +4,7 @@ Includes scripts and code to build local PostgreSql db from raw MedDRA files.
 
 * <https://meddra.com/>
 * MedDRA is regularly updated, &gt;1/year.
-* Latest at time of this writing: v24.0 (March 2021).
+* Latest at time of this writing: v25.0 (March 2022).
 
 (Download credentials required, via MedDRA subscription.)
 
