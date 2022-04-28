@@ -28,7 +28,7 @@ ${cwd}/python/meddra_utils.py convert_hlt --i ${DBDIR}/MedAscii/hlt.asc --o $DAT
 ${cwd}/python/meddra_utils.py convert_hlgt --i ${DBDIR}/MedAscii/hlgt.asc --o $DATADIR/meddra_hlgt.tsv
 ${cwd}/python/meddra_utils.py convert_pt --i ${DBDIR}/MedAscii/pt.asc --o $DATADIR/meddra_pt.tsv
 ${cwd}/python/meddra_utils.py convert_llt --i ${DBDIR}/MedAscii/llt.asc --o $DATADIR/meddra_llt.tsv
-${cwd}/python/meddra_utils.py convert_llt2pt --i ${DBDIR}/MedAscii/llt.asc --o $DATADIR/meddra_pt2llt.tsv
+${cwd}/python/meddra_utils.py convert_llt2pt --i ${DBDIR}/MedAscii/llt.asc --o $DATADIR/meddra_llt2pt.tsv
 ${cwd}/python/meddra_utils.py convert_soc2hlgt --i ${DBDIR}/MedAscii/soc_hlgt.asc --o $DATADIR/meddra_soc2hlgt.tsv
 ${cwd}/python/meddra_utils.py convert_hlgt2hlt --i ${DBDIR}/MedAscii/hlgt_hlt.asc --o $DATADIR/meddra_hlgt2hlt.tsv
 ${cwd}/python/meddra_utils.py convert_hlt2pt --i ${DBDIR}/MedAscii/hlt_pt.asc --o $DATADIR/meddra_hlt2pt.tsv
@@ -46,7 +46,7 @@ $DATADIR/meddra_hlgt2hlt.tsv \
 $DATADIR/meddra_pt.tsv \
 $DATADIR/meddra_hlt2pt.tsv \
 $DATADIR/meddra_llt.tsv \
-$DATADIR/meddra_pt2llt.tsv \
+$DATADIR/meddra_llt2pt.tsv \
 $DATADIR/meddra_intl.tsv \
 $DATADIR/meddra_smq_list.tsv \
 $DATADIR/meddra_smq_content.tsv \
@@ -64,17 +64,18 @@ for tsvfile in $tsvfiles ; do
 	tname=$(echo $tsvfile |perl -pe 's/^.*meddra_(\S+)\.tsv/$1/;')
 	printf "${i_table}. CREATING AND LOADING TABLE: ${tname} FROM INPUT FILE: ${tsvfile} (${n_lines} lines)\n"
 	#
-	${cwd}/python/csv2sql.py create --fixtags --maxchar 2000 \
+	${cwd}/python/csv2sql.py create --fixtags --nullify --maxchar 2000 \
 		--i $tsvfile --tsv --tablename "$tname" \
 		|psql -d $DBNAME
 	#
-	${cwd}/python/csv2sql.py insert --fixtags --maxchar 2000 \
+	${cwd}/python/csv2sql.py insert --fixtags --nullify --maxchar 2000 \
 		--i $tsvfile --tsv --tablename "$tname" \
 		|psql -q -d $DBNAME
 	#
 done
 printf "TABLES CREATED AND LOADED: ${i_table}\n"
 #
+#psql -d $DBNAME -c "UPDATE soc SET text = NULL WHERE text = ''";
 ###
 psql -d $DBNAME -c "COMMENT ON TABLE soc IS 'MedDRA: System Organ Class (SOC)'";
 psql -d $DBNAME -c "COMMENT ON TABLE hlt IS 'MedDRA: High Level Term (HLT)'";
@@ -82,7 +83,6 @@ psql -d $DBNAME -c "COMMENT ON TABLE hlgt IS 'MedDRA: High Level Group Term (HLG
 psql -d $DBNAME -c "COMMENT ON TABLE llt IS 'MedDRA: Low Level Term (LLT)'";
 psql -d $DBNAME -c "COMMENT ON TABLE pt IS 'MedDRA: Preferred Term (PT)'";
 #
-psql -d $DBNAME -c "UPDATE soc SET text = NULL WHERE text = ''";
 #
 ###
 # How to dump and restore:

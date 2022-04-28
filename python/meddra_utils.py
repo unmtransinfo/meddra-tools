@@ -32,17 +32,17 @@ def ConvertSoc(fin, fout):
     line=re.sub('\$+$','', line)
     fields=re.split('\$', line)
     if len(fields)!=3:
-      logging.error("Bad line: %s"%line)
+      logging.error(f"Bad line: {line}")
       continue
     soc_id=int(fields[0])
     txt=fields[1]
     txt=re.sub(r'\t', ' ', txt)
     abr=fields[2]
-    fout.write("%d"%soc_id)
-    fout.write("\t%s"%txt)
-    fout.write("\t%s\n"%abr)
+    fout.write(f"{soc_id}")
+    fout.write(f"\t{txt}")
+    fout.write(f"\t{abr}\n")
     n_lines+=1
-  logging.info("lines: %d"%n_lines)
+  logging.info(f"lines: {n_lines}")
 
 #############################################################################
 def ConvertHlt(fin, fout):
@@ -57,16 +57,16 @@ def ConvertHlt(fin, fout):
     line=re.sub('\$+$', '', line)
     fields=re.split('\$', line)
     if len(fields)<2:
-      logging.error("Bad line: %s"%line)
+      logging.error(f"Bad line: {line}")
       continue
     elif len(fields)>2:
-      logging.warning("Non-compliant line: %s"%line)
+      logging.warning(f"Non-compliant line: {line}")
     hlt_id=int(fields[0])
     txt=fields[1]
     txt=re.sub(r'\t', ' ', txt)
-    fout.write("%d\t%s\n"%(hlt_id, txt))
+    fout.write(f"{hlt_id}\t{txt}\n")
     n_lines+=1
-  logging.info("lines: %d"%n_lines)
+  logging.info(f"lines: {n_lines}")
 
 #############################################################################
 def ConvertHlgt(fin, fout):
@@ -81,14 +81,14 @@ def ConvertHlgt(fin, fout):
     line=re.sub('\$+$', '', line)
     fields=re.split('\$', line)
     if len(fields)!=2:
-      logging.error("Bad line: %s"%line)
+      logging.error(f"Bad line: {line}")
       continue
     soc_id=int(fields[0])
     txt=fields[1]
     txt=re.sub(r'\t', ' ', txt)
-    fout.write('%d\t%s\n'%(soc_id, txt))
+    fout.write(f'{soc_id}\t{txt}\n')
     n_lines+=1
-  logging.info("lines: %d"%n_lines)
+  logging.info(f"lines: {n_lines}")
 
 #############################################################################
 def ConvertPt(fin, fout):
@@ -103,7 +103,7 @@ def ConvertPt(fin, fout):
     line=re.sub('\$+$', '', line)
     fields=re.split('\$', line)
     if len(fields)<2:
-      logging.error("Bad line: %s"%line)
+      logging.error(f"Bad line: {line}")
       continue
     pt_id=int(fields[0])
     txt=fields[1]
@@ -115,17 +115,17 @@ def ConvertPt(fin, fout):
     icd9=fields[7] if len(fields)>7 else None
     icd9cm=fields[8] if len(fields)>8 else None
     jart=fields[10] if len(fields)>10 else None
-    fout.write("%d"%pt_id)
-    fout.write("\t%s"%txt)
-    fout.write("\t%d"%(soc if soc else ''))
-    fout.write("\t%s"%(whoart if whoart else ''))
-    fout.write("\t%s"%(harts if harts else ''))
-    fout.write("\t%s"%(costart if costart else ''))
-    fout.write("\t%s"%(icd9 if icd9 else ''))
-    fout.write("\t%s"%(icd9cm if icd9cm else ''))
-    fout.write("\t%s\n"%(jart if jart else ''))
+    fout.write(f"{pt_id}")
+    fout.write(f"\t{txt}")
+    fout.write(f"\t{soc if soc else ''}")
+    fout.write(f"\t{whoart if whoart else ''}")
+    fout.write(f"\t{harts if harts else ''}")
+    fout.write(f"\t{costart if costart else ''}")
+    fout.write(f"\t{icd9 if icd9 else ''}")
+    fout.write(f"\t{icd9cm if icd9cm else ''}")
+    fout.write(f"\t{jart if jart else ''}\n")
     n_lines+=1
-  logging.info("lines: %d"%n_lines)
+  logging.info(f"lines: {n_lines}")
 
 #############################################################################
 def ConvertLlt(fin, fout):
@@ -140,7 +140,7 @@ def ConvertLlt(fin, fout):
     line=re.sub('\$+$', '', line)
     fields=re.split('\$', line)
     if len(fields)<2:
-      logging.error("Bad line: %s"%line)
+      logging.error(f"Bad line: {line}")
       continue
     llt_id=int(fields[0])
     txt=fields[1]
@@ -152,16 +152,16 @@ def ConvertLlt(fin, fout):
     if len(fields)>9:
       current='TRUE' if fields[9]=='Y' else 'FALSE'
     jart=fields[10] if len(fields)>10 else None
-    fout.write("%d"%llt_id)
-    fout.write("\t%s"%txt)
-    fout.write("\t%s"%(str(pt) if pt else ''))
-    fout.write("\t%s"%(whoart if whoart else ''))
-    fout.write("\t%s"%(costart if costart else ''))
-    fout.write("\t%s"%(icd9cm if icd9cm else ''))
-    fout.write("\t%s"%(current if current else ''))
-    fout.write("\t%s\n"%(jart if jart else ''))
+    fout.write(f"{llt_id}")
+    fout.write(f"\t{txt}")
+    fout.write(f"\t{str(pt) if pt else ''}")
+    fout.write(f"\t{whoart if whoart else ''}")
+    fout.write(f"\t{costart if costart else ''}")
+    fout.write(f"\t{icd9cm if icd9cm else ''}")
+    fout.write(f"\t{current if current else ''}")
+    fout.write(f"\t{jart if jart else ''}\n")
     n_lines+=1
-  logging.info("lines: %d"%n_lines)
+  logging.info(f"lines: {n_lines}")
 
 #############################################################################
 def ConvertLlt2pt(fin, fout):
@@ -176,14 +176,14 @@ def ConvertLlt2pt(fin, fout):
     line=re.sub('\$+$', '', line)
     fields=re.split('\$', line)
     if len(fields)<2:
-      logging.error("Bad line: %s"%line)
+      logging.error(f"Bad line: {line}")
       continue
     llt_id=int(fields[0])
     pt=int(fields[2]) if len(fields)>2 else None
     if pt:
-      fout.write("%d\t%d\n"%(pt, llt_id))
+      fout.write(f"{pt}\t{llt_id}\n")
     n_lines+=1
-  logging.info("lines: %d"%n_lines)
+  logging.info(f"lines: {n_lines}")
 
 #############################################################################
 def ConvertSoc2hlgt(fin, fout):
@@ -198,11 +198,11 @@ def ConvertSoc2hlgt(fin, fout):
     line=re.sub('\$+$', '', line)
     fields=re.split('\$', line)
     if len(fields)<2:
-      logging.error("Bad line: %s"%line)
+      logging.error(f"Bad line: {line}")
       continue
-    fout.write("%s\t%s\n"%(fields[0], fields[1]))
+    fout.write(f"{fields[0]}\t{fields[1]}\n")
     n_lines+=1
-  logging.info("lines: %d"%n_lines)
+  logging.info(f"lines: {n_lines}")
 
 #############################################################################
 def ConvertHlgt2Hlt(fin, fout):
@@ -217,11 +217,11 @@ def ConvertHlgt2Hlt(fin, fout):
     line=re.sub('\$+$', '', line)
     fields=re.split('\$', line)
     if len(fields)<2:
-      logging.error("Bad line: %s"%line)
+      logging.error(f"Bad line: {line}")
       continue
-    fout.write("%s\t%s\n"%(fields[0], fields[1]))
+    fout.write(f"{fields[0]}\t{fields[1]}\n")
     n_lines+=1
-  logging.info("lines: %d"%n_lines)
+  logging.info(f"lines: {n_lines}")
 
 #############################################################################
 def ConvertHlt2Pt(fin, fout):
@@ -236,11 +236,11 @@ def ConvertHlt2Pt(fin, fout):
     line=re.sub('\$+$', '', line)
     fields=re.split('\$', line)
     if len(fields)<2:
-      logging.error("Bad line: %s"%line)
+      logging.error(f"Bad line: {line}")
       continue
-    fout.write("%s\t%s\n"%(fields[0], fields[1]))
+    fout.write(f"{fields[0]}\t{fields[1]}\n")
     n_lines+=1
-  logging.info("lines: %d"%n_lines)
+  logging.info(f"lines: {n_lines}")
 
 #############################################################################
 def ConvertSoc2intl(fin, fout):
@@ -255,11 +255,11 @@ def ConvertSoc2intl(fin, fout):
     line=re.sub('\$+$', '', line)
     fields=re.split('\$', line)
     if len(fields)<2:
-      logging.error("Bad line: %s"%line)
+      logging.error(f"Bad line: {line}")
       continue
-    fout.write("%s\t%s\n"%(fields[0], fields[1]))
+    fout.write(f"{fields[0]}\t{fields[1]}\n")
     n_lines+=1
-  logging.info("lines: %d"%n_lines)
+  logging.info(f"lines: {n_lines}")
 
 #############################################################################
 def ConvertSmqlist(fin, fout):
@@ -277,7 +277,7 @@ def ConvertSmqlist(fin, fout):
     fields=re.split('\$', line)
     fout.write('\t'.join(fields)+'\n')
     n_lines+=1
-  logging.info("lines: %d"%n_lines)
+  logging.info(f"lines: {n_lines}")
 
 #############################################################################
 def ConvertSmqcontent(fin, fout):
@@ -295,7 +295,7 @@ def ConvertSmqcontent(fin, fout):
     fields=re.split('\$', line)
     fout.write('\t'.join(fields)+'\n')
     n_lines+=1
-  logging.info("lines: %d"%n_lines)
+  logging.info(f"lines: {n_lines}")
 
 #############################################################################
 ### Db functions:
@@ -314,16 +314,16 @@ def DescribeDB():
   rows = cur.fetchall()
   for row in rows:
     tablename = row[0]
-    sql = ("SELECT COUNT(*) FROM %s"%tablename)
+    sql = (f"SELECT COUNT(*) FROM {tablename}")
     cur.execute(sql)
     rows = cur.fetchall()
-    outtxt+=("table: %s\n"%tablename)
-    outtxt+="\tROWCOUNT: %6d\n"%(rows[0][0])
-    sql = ("SELECT column_name,data_type FROM information_schema.columns WHERE table_name = '%s'"%tablename)
+    outtxt += (f"table: {tablename}\n")
+    outtxt += f"\tROWCOUNT: {rows[0][0]:6d}\n"
+    sql = (f"SELECT column_name,data_type FROM information_schema.columns WHERE table_name = '{tablename}'")
     cur.execute(sql)
     rows = cur.fetchall()
     for j,row in enumerate(rows):
-      outtxt+=("\t%d. %-12s (%s)\n"%(j+1, row[0], row[1]))
+      outtxt += (f"\t{j+1}. {row[0]:<12} ({row[1]})\n")
   cur.close()
   db.close()
   return outtxt
@@ -332,7 +332,7 @@ def DescribeDB():
 def SocID2HlgtIDs(socid):
   hlgtids=[]
   db,cur = Connect()
-  sql=("SELECT hlgt_id FROM soc2hlgt WHERE soc_id='%s'"%socid)
+  sql=(f"SELECT hlgt_id FROM soc2hlgt WHERE soc_id='{socid}'")
   cur.execute(sql)
   rows=cur.fetchall()
   cur.close()
@@ -343,10 +343,8 @@ def SocID2HlgtIDs(socid):
 
 #############################################################################
 def Lltsearch(qtxt):
-  id,text,pt,whoart,costart,icd9cm,current,jart = \
-  	None,None,None,None,None,None,None,None 
   db,cur = Connect()
-  sql=("SELECT id,text,pt,whoart,costart,icd9cm,current,jart FROM llt WHERE text ILIKE '%s'"%qtxt)
+  sql=(f"SELECT id,text,pt,whoart,costart,icd9cm,current,jart FROM llt WHERE text ILIKE '{qtxt}'")
   cur.execute(sql)
   rows=cur.fetchall()
   cur.close()
@@ -371,7 +369,7 @@ if __name__=='__main__':
 	"convert_smq_list", # from smq_list.asc
 	"convert_smq_content" # from smq_content.asc
 	]
-  parser.add_argument("op", choices=ops, help='operation')
+  parser.add_argument("op", choices=ops, help='OPERATION')
   parser.add_argument("--i", dest="ifile", help="input file (.asc)")
   parser.add_argument("--o", dest="ofile", help="output")
   parser.add_argument("-v", "--verbose", default=0, action="count")
@@ -385,6 +383,8 @@ if __name__=='__main__':
     sys.exit()
 
   if not fin: parser.error('Input file required.')
+
+  logging.info(f"CONVERTING INPUT: {args.ifile}; OUTPUT: {args.ofile if args.ofile else 'STDOUT'}")
 
   if args.op=="convert_soc":
     ConvertSoc(fin, fout)
@@ -411,5 +411,5 @@ if __name__=='__main__':
   elif args.op=="convert_smq_content":
     ConvertSmqcontent(fin, fout)
   else:
-    parser.error('Invalid operation: {0}'.format(args.op))
+    parser.error(f"Invalid operation: {args.op}")
 
