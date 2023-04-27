@@ -7,7 +7,12 @@ T0=$(date +%s)
 #
 cwd=$(pwd)
 #
-DBVERSION="25.0"
+if [ ! -f ${cwd}/LATEST_RELEASE.txt ]; then
+	printf "ERROR: not found: ${cwd}/LATEST_RELEASE.txt\n"
+	exit
+fi
+DBVERSION=$(cat ${cwd}/LATEST_RELEASE.txt)
+printf "From ${cwd}/LATEST_RELEASE.txt: ${DBVERSION}\n"
 DBNAME="meddra_$(echo $DBVERSION |sed 's/\.//g')"
 DATADIR="${cwd}/data"
 #
