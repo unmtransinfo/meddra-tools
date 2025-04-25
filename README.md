@@ -4,15 +4,21 @@ Includes scripts and code to build local PostgreSql db from raw MedDRA files.
 
 * <https://meddra.com/>
 * MedDRA is regularly updated, &gt;1/year.
-* Latest at time of this writing: v26.0 (March 2023).
+* Latest at time of this writing: v28.0 (March 2025).
 
 (Download credentials required, via MedDRA subscription.)
+
+## Dependencies
+
+ * [BioClients](https://github.com/jeremyjyang/BioClients) for use of Csv2Sql.
+
+## Introduction
 
 MedDRA = Medical Dictionary for Regulatory Activities
 MSSO = Maintenance and Support Services Organization
 COSTAR(T) = Computer-Stored Ambulatory Record (Term)
 
-Hierarchy of terms (descending order):
+### Hierarchy of terms (descending order):
 
 	SOC = System Organ Class
 	HLGT = High Level Group Term
@@ -20,36 +26,37 @@ Hierarchy of terms (descending order):
 	PT = Preferred Term
 	LLT = Lowest Level Term
 
-System Organ Classes:
+### System Organ Classes:
 
-	Blood and lymphatic system disorders
-	Cardiac disorders
-	Congenital, familial and genetic disorders
-	Ear and labyrinth disorders
-	Endocrine disorders
-	Eye disorders
-	Gastrointestinal disorders
-	General disorders and administration site conditions
-	Hepatobiliary disorders
-	Immune system disorders
-	Infections and infestations
-	Injury, poisoning and procedural complications
-	Investigations
-	Metabolism and nutrition disorders
-	Musculoskeletal and connective tissue disorders
-	Neoplasms benign, malignant and unspecified (incl cysts and polyps)
-	Nervous system disorders
-	Pregnancy, puerperium and perinatal conditions
-	Psychiatric disorders
-	Renal and urinary disorders
-	Reproductive system and breast disorders
-	Respiratory, thoracic and mediastinal disorders
-	Skin and subcutaneous tissue disorders
-	Social circumstances
-	Surgical and medical procedures
-	Vascular disorders
-	Product issues
-
+|id 	|text 	|abbr |
+|:---:|:---|:---|
+|10005329	|Blood and lymphatic system disorders	|Blood |
+|10007541	|Cardiac disorders	Card |
+|10010331	|Congenital, familial and genetic disorders	|Cong |
+|10013993	|Ear and labyrinth disorders	|Ear |
+|10014698	|Endocrine disorders	|Endo |
+|10015919	|Eye disorders	|Eye |
+|10017947	|Gastrointestinal disorders	|Gastr |
+|10018065	|General disorders and administration site conditions	|Genrl |
+|10019805	|Hepatobiliary disorders	|Hepat |
+|10021428	|Immune system disorders	|Immun |
+|10021881	|Infections and infestations	|Infec |
+|10022117	|Injury, poisoning and procedural complications	|Inj&P |
+|10022891	|Investigations	|Inv |
+|10027433	|Metabolism and nutrition disorders	|Metab |
+|10028395	|Musculoskeletal and connective tissue disorders	|Musc |
+|10029104	|Neoplasms benign, malignant and unspecified (incl...	|Neopl |
+|10029205	|Nervous system disorders	|Nerv |
+|10036585	|Pregnancy, puerperium and perinatal conditions	|Preg |
+|10037175	|Psychiatric disorders	|Psych |
+|10038359	|Renal and urinary disorders	|Renal |
+|10038604	|Reproductive system and breast disorders	|Repro |
+|10038738	|Respiratory, thoracic and mediastinal disorders	|Resp |
+|10040785	|Skin and subcutaneous tissue disorders	|Skin |
+|10041244	|Social circumstances	|SocCi |
+|10042613	|Surgical and medical procedures	|Surg |
+|10047065	|Vascular disorders	|Vasc |
+|10077536	|Product issues	|Prod |
 
 Each term has a code, which are specified in the files hlgt.asc, hlt.asc,
 llt.asc, pt.asc, and soc.asc, for example from hlgt.asc:

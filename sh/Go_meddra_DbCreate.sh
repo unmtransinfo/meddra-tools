@@ -69,11 +69,13 @@ for tsvfile in $tsvfiles ; do
 	tname=$(echo $tsvfile |perl -pe 's/^.*meddra_(\S+)\.tsv/$1/;')
 	printf "${i_table}. CREATING AND LOADING TABLE: ${tname} FROM INPUT FILE: ${tsvfile} (${n_lines} lines)\n"
 	#
-	${cwd}/python/csv2sql.py create --fixtags --nullify --maxchar 2000 \
+	python3 -m BioClients.util.pandas.Csv2Sql \
+		create --fixtags --nullify --maxchar 2000 \
 		--i $tsvfile --tsv --tablename "$tname" \
 		|psql -d $DBNAME
 	#
-	${cwd}/python/csv2sql.py insert --fixtags --nullify --maxchar 2000 \
+	python3 -m BioClients.util.pandas.Csv2Sql \
+		insert --fixtags --nullify --maxchar 2000 \
 		--i $tsvfile --tsv --tablename "$tname" \
 		|psql -q -d $DBNAME
 	#

@@ -29,8 +29,8 @@ def ConvertSoc(fin, fout):
     if not line: break
     line=line.strip()
     if not line or line[0]=='#': continue
-    line=re.sub('\$+$','', line)
-    fields=re.split('\$', line)
+    line=re.sub(r'\$+$','', line)
+    fields=re.split(r'\$', line)
     if len(fields)!=3:
       logging.error(f"Bad line: {line}")
       continue
@@ -54,8 +54,8 @@ def ConvertHlt(fin, fout):
     if not line: break
     line=line.strip()
     if not line or line[0]=='#': continue
-    line=re.sub('\$+$', '', line)
-    fields=re.split('\$', line)
+    line=re.sub(r'\$+$', '', line)
+    fields=re.split(r'\$', line)
     if len(fields)<2:
       logging.error(f"Bad line: {line}")
       continue
@@ -78,8 +78,8 @@ def ConvertHlgt(fin, fout):
     if not line: break
     line=line.strip()
     if not line or line[0]=='#': continue
-    line=re.sub('\$+$', '', line)
-    fields=re.split('\$', line)
+    line=re.sub(r'\$+$', '', line)
+    fields=re.split(r'\$', line)
     if len(fields)!=2:
       logging.error(f"Bad line: {line}")
       continue
@@ -100,8 +100,8 @@ def ConvertPt(fin, fout):
     if not line: break
     line=line.strip()
     if not line or line[0]=='#': continue
-    line=re.sub('\$+$', '', line)
-    fields=re.split('\$', line)
+    line=re.sub(r'\$+$', '', line)
+    fields=re.split(r'\$', line)
     if len(fields)<2:
       logging.error(f"Bad line: {line}")
       continue
@@ -137,8 +137,8 @@ def ConvertLlt(fin, fout):
     if not line: break
     line=line.strip()
     if not line or line[0]=='#': continue
-    line=re.sub('\$+$', '', line)
-    fields=re.split('\$', line)
+    line=re.sub(r'\$+$', '', line)
+    fields=re.split(r'\$', line)
     if len(fields)<2:
       logging.error(f"Bad line: {line}")
       continue
@@ -173,8 +173,8 @@ def ConvertLlt2pt(fin, fout):
     if not line: break
     line=line.strip()
     if not line or line[0]=='#': continue
-    line=re.sub('\$+$', '', line)
-    fields=re.split('\$', line)
+    line=re.sub(r'\$+$', '', line)
+    fields=re.split(r'\$', line)
     if len(fields)<2:
       logging.error(f"Bad line: {line}")
       continue
@@ -195,8 +195,8 @@ def ConvertSoc2hlgt(fin, fout):
     if not line: break
     line=line.strip()
     if not line or line[0]=='#': continue
-    line=re.sub('\$+$', '', line)
-    fields=re.split('\$', line)
+    line=re.sub(r'\$+$', '', line)
+    fields=re.split(r'\$', line)
     if len(fields)<2:
       logging.error(f"Bad line: {line}")
       continue
@@ -214,8 +214,8 @@ def ConvertHlgt2Hlt(fin, fout):
     if not line: break
     line=line.strip()
     if not line or line[0]=='#': continue
-    line=re.sub('\$+$', '', line)
-    fields=re.split('\$', line)
+    line=re.sub(r'\$+$', '', line)
+    fields=re.split(r'\$', line)
     if len(fields)<2:
       logging.error(f"Bad line: {line}")
       continue
@@ -233,8 +233,8 @@ def ConvertHlt2Pt(fin, fout):
     if not line: break
     line=line.strip()
     if not line or line[0]=='#': continue
-    line=re.sub('\$+$', '', line)
-    fields=re.split('\$', line)
+    line=re.sub(r'\$+$', '', line)
+    fields=re.split(r'\$', line)
     if len(fields)<2:
       logging.error(f"Bad line: {line}")
       continue
@@ -252,8 +252,8 @@ def ConvertSoc2intl(fin, fout):
     if not line: break
     line=line.strip()
     if not line or line[0]=='#': continue
-    line=re.sub('\$+$', '', line)
-    fields=re.split('\$', line)
+    line=re.sub(r'\$+$', '', line)
+    fields=re.split(r'\$', line)
     if len(fields)<2:
       logging.error(f"Bad line: {line}")
       continue
@@ -272,9 +272,9 @@ def ConvertSmqlist(fin, fout):
     if not line: break
     line=line.strip()
     if not line or line[0]=='#': continue
-    line=re.sub('\$+$', '', line)
+    line=re.sub(r'\$+$', '', line)
     line=re.sub('\t', ' ', line)
-    fields=re.split('\$', line)
+    fields=re.split(r'\$', line)
     fout.write('\t'.join(fields)+'\n')
     n_lines+=1
   logging.info(f"lines: {n_lines}")
@@ -290,9 +290,9 @@ def ConvertSmqcontent(fin, fout):
     if not line: break
     line=line.strip()
     if not line or line[0]=='#': continue
-    line=re.sub('\$+$', '', line)
+    line=re.sub(r'\$+$', '', line)
     line=re.sub('\t', ' ', line)
-    fields=re.split('\$', line)
+    fields=re.split(r'\$', line)
     fout.write('\t'.join(fields)+'\n')
     n_lines+=1
   logging.info(f"lines: {n_lines}")
