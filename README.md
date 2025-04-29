@@ -31,7 +31,7 @@ COSTAR(T) = Computer-Stored Ambulatory Record (Term)
 |id 	|text 	|abbr |
 |:---:|:---|:---|
 |10005329	|Blood and lymphatic system disorders	|Blood |
-|10007541	|Cardiac disorders	Card |
+|10007541	|Cardiac disorders	|Card |
 |10010331	|Congenital, familial and genetic disorders	|Cong |
 |10013993	|Ear and labyrinth disorders	|Ear |
 |10014698	|Endocrine disorders	|Endo |

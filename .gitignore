@@ -1,0 +1,16 @@
+.Rproj.user
+.Rhistory
+**/*.RData
+**/*.Rdata
+**/*.Ruserdata
+Rplot*
+*.Rproj
+
+data
+
+**/__pycache__/
+**/*.pyc
+
+**/*.gz
+
+**/.DS_Store
