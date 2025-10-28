@@ -4,13 +4,57 @@ Includes scripts and code to build local PostgreSql db from raw MedDRA files.
 
 * <https://meddra.com/>
 * MedDRA is regularly updated, &gt;1/year.
-* Latest at time of this writing: v28.0 (March 2025).
 
 (Download credentials required, via MedDRA subscription.)
 
 ## Dependencies
 
- * [BioClients](https://github.com/jeremyjyang/BioClients) for use of Csv2Sql.
+ * Some python packages (instructions below)
+ * Docker and Docker Compose (for running PostgreSQL locally)
+
+## Quick Start
+
+### 1. Starting the PostgreSQL Database
+
+The easiest way to start a PostgreSQL database for this project is using Docker Compose:
+
+```bash
+# Start the database
+docker-compose up -d
+
+# Stop the database
+docker-compose down
+```
+
+The database will be available at:
+- **Host**: localhost
+- **Port**: 5432
+- **Database**: meddra
+- **Username**: meddra
+- **Password**: meddra
+
+Connection string: `postgresql://meddra:meddra@localhost:5432/meddra`
+
+**Attention:** the script creates databases for each MedDRA version and the `meddra` one is the default.
+
+### 2. Install the required python packages
+
+```sh
+python3 -m pip install BioClients
+python3 -m pip install psycopg2
+```
+
+### 3. Copy the raw MedDRA files
+
+Locate the `.asc` files from MedDRA (subscription required to access the values) and paste them inside `data/MedAscii`
+
+### 4. Execute the script
+
+```sh
+./sh/Go_meddra_DbCreate.sh
+```
+
+The script will create a new database named `meddra_xyz` (xyz being the version at `LATEST_RELEASE.txt`) with all the terms inside of it.
 
 ## Introduction
 
