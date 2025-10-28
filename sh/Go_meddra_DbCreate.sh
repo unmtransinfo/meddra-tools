@@ -7,24 +7,34 @@ T0=$(date +%s)
 #
 cwd=$(pwd)
 #
+# PostgreSQL connection parameters for Docker
+export PGHOST="${PGHOST:-localhost}"
+export PGPORT="${PGPORT:-5432}"
+export PGUSER="${PGUSER:-meddra}"
+export PGPASSWORD="${PGPASSWORD:-meddra}"
+#
 if [ ! -f ${cwd}/LATEST_RELEASE.txt ]; then
-	printf "ERROR: not found: ${cwd}/LATEST_RELEASE.txt\n"
-	exit
+  printf "ERROR: not found: ${cwd}/LATEST_RELEASE.txt\n"
+  exit
 fi
 DBVERSION=$(cat ${cwd}/LATEST_RELEASE.txt)
 printf "From ${cwd}/LATEST_RELEASE.txt: ${DBVERSION}\n"
-DBNAME="meddra_$(echo $DBVERSION |sed 's/\.//g')"
+DBNAME="meddra_$(echo $DBVERSION | sed 's/\.//g')"
 DATADIR="${cwd}/data"
 #
 if [ ! -e "$DATADIR" ]; then
-	mkdir $DATADIR
+  mkdir $DATADIR
 fi
 #
-DBDIR=$(cd $HOME/../data/MedDRA/${DBVERSION}; pwd)
+DBDIR=$(
+  # cd $HOME/../data/MedDRA/${DBVERSION}
+  cd data
+  pwd
+)
 #
 if [ ! -e "${DBDIR}" ]; then
-	printf "ERROR: DBDIR not found: ${DBDIR}\n"
-	exit 1
+  printf "ERROR: DBDIR not found: ${DBDIR}\n"
+  exit 1
 fi
 #
 printf "CONVERTING RAW FILES TO TSVS.\n"
@@ -60,35 +70,35 @@ $DATADIR/meddra_smq_content.tsv \
 psql -c "DROP DATABASE IF EXISTS $DBNAME"
 psql -c "CREATE DATABASE $DBNAME"
 #
-psql -d $DBNAME -c "COMMENT ON DATABASE $DBNAME IS 'MedDRA: Medical Dictionary for Regulatory Activities (v${DBVERSION})'";
+psql -d $DBNAME -c "COMMENT ON DATABASE $DBNAME IS 'MedDRA: Medical Dictionary for Regulatory Activities (v${DBVERSION})'"
 #
 i_table="0"
-for tsvfile in $tsvfiles ; do
-	i_table=$[$i + 1]
-	n_lines=$(cat $tsvfile |wc -l)
-	tname=$(echo $tsvfile |perl -pe 's/^.*meddra_(\S+)\.tsv/$1/;')
-	printf "${i_table}. CREATING AND LOADING TABLE: ${tname} FROM INPUT FILE: ${tsvfile} (${n_lines} lines)\n"
-	#
-	python3 -m BioClients.util.pandas.Csv2Sql \
-		create --fixtags --nullify --maxchar 2000 \
-		--i $tsvfile --tsv --tablename "$tname" \
-		|psql -d $DBNAME
-	#
-	python3 -m BioClients.util.pandas.Csv2Sql \
-		insert --fixtags --nullify --maxchar 2000 \
-		--i $tsvfile --tsv --tablename "$tname" \
-		|psql -q -d $DBNAME
-	#
+for tsvfile in $tsvfiles; do
+  i_table=$(($i + 1))
+  n_lines=$(cat $tsvfile | wc -l)
+  tname=$(echo $tsvfile | perl -pe 's/^.*meddra_(\S+)\.tsv/$1/;')
+  printf "${i_table}. CREATING AND LOADING TABLE: ${tname} FROM INPUT FILE: ${tsvfile} (${n_lines} lines)\n"
+  #
+  python3 -m BioClients.util.pandas.Csv2Sql \
+    create --fixtags --nullify --maxchar 2000 \
+    --i $tsvfile --tsv --tablename "$tname" |
+    psql -d $DBNAME
+  #
+  python3 -m BioClients.util.pandas.Csv2Sql \
+    insert --fixtags --nullify --maxchar 2000 \
+    --i $tsvfile --tsv --tablename "$tname" |
+    psql -q -d $DBNAME
+  #
 done
 printf "TABLES CREATED AND LOADED: ${i_table}\n"
 #
 #psql -d $DBNAME -c "UPDATE soc SET text = NULL WHERE text = ''";
 ###
-psql -d $DBNAME -c "COMMENT ON TABLE soc IS 'MedDRA: System Organ Class (SOC)'";
-psql -d $DBNAME -c "COMMENT ON TABLE hlt IS 'MedDRA: High Level Term (HLT)'";
-psql -d $DBNAME -c "COMMENT ON TABLE hlgt IS 'MedDRA: High Level Group Term (HLGT)'";
-psql -d $DBNAME -c "COMMENT ON TABLE llt IS 'MedDRA: Low Level Term (LLT)'";
-psql -d $DBNAME -c "COMMENT ON TABLE pt IS 'MedDRA: Preferred Term (PT)'";
+psql -d $DBNAME -c "COMMENT ON TABLE soc IS 'MedDRA: System Organ Class (SOC)'"
+psql -d $DBNAME -c "COMMENT ON TABLE hlt IS 'MedDRA: High Level Term (HLT)'"
+psql -d $DBNAME -c "COMMENT ON TABLE hlgt IS 'MedDRA: High Level Group Term (HLGT)'"
+psql -d $DBNAME -c "COMMENT ON TABLE llt IS 'MedDRA: Low Level Term (LLT)'"
+psql -d $DBNAME -c "COMMENT ON TABLE pt IS 'MedDRA: Preferred Term (PT)'"
 #
 #
 ###
@@ -96,5 +106,5 @@ psql -d $DBNAME -c "COMMENT ON TABLE pt IS 'MedDRA: Preferred Term (PT)'";
 # pg_dump --no-privileges -Fc -d ${DBNAME} >${DBNAME}.pgdump
 # createdb ${DBNAME} ; pg_restore -e -O -x -d ${DBNAME} ${DBNAME}.pgdump
 ###
-printf "Elapsed: %ds\n" "$[$(date +%s) - $T0]"
+printf "Elapsed: %ds\n" "$(($(date +%s) - $T0))"
 #
