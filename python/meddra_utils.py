@@ -375,8 +375,8 @@ if __name__=='__main__':
   parser.add_argument("-v", "--verbose", default=0, action="count")
   args = parser.parse_args()
 
-  fin = open(args.ifile) if args.ifile else None
-  fout = open(args.ofile,"w") if args.ofile else sys.stdout
+  fin = open(args.ifile, encoding='latin-1') if args.ifile else None
+  fout = open(args.ofile, "w", encoding='utf-8') if args.ofile else sys.stdout
 
   if args.op=="dbdescribe":
     print(DescribeDB())
