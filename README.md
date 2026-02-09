@@ -20,10 +20,10 @@ The easiest way to start a PostgreSQL database for this project is using Docker 
 
 ```bash
 # Start the database
-docker-compose up -d
+docker compose up -d
 
 # Stop the database
-docker-compose down
+docker compose down
 ```
 
 The database will be available at:
@@ -48,7 +48,11 @@ python3 -m pip install psycopg2
 
 Locate the `.asc` files from MedDRA (subscription required to access the values) and paste them inside `data/MedAscii`
 
-### 4. Execute the script
+### 4. Update the `LATEST_RELEASE.txt` file
+
+- Update the `LATEST_RELEASE.txt` file with the latest version of MedDRA.
+
+### 5. Execute the script
 
 ```sh
 ./sh/Go_meddra_DbCreate.sh
