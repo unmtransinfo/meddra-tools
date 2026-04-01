@@ -9,9 +9,9 @@ cwd=$(pwd)
 #
 # PostgreSQL connection parameters for Docker
 export PGHOST="${PGHOST:-localhost}"
-export PGPORT="${PGPORT:-5432}"
-export PGUSER="${PGUSER:-meddra}"
-export PGPASSWORD="${PGPASSWORD:-meddra}"
+export PGPORT="${PGPORT:-5433}"
+export PGUSER="${PGUSER:-meddict}"
+export PGPASSWORD="${PGPASSWORD:-meddict}"
 #
 if [ ! -f ${cwd}/LATEST_RELEASE.txt ]; then
   printf "ERROR: not found: ${cwd}/LATEST_RELEASE.txt\n"

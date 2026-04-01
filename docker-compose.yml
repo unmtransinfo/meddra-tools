@@ -1,15 +1,21 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: meddra-postgres
+    container_name: medical-coding
+    restart: unless-stopped
     environment:
-      POSTGRES_USER: meddra
-      POSTGRES_PASSWORD: meddra
-      POSTGRES_DB: meddra
+      POSTGRES_USER: ${POSTGRES_USER:-meddict}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-meddict}
+      POSTGRES_DB: ${POSTGRES_DB:-medical-coding}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5433}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    command: >
+      postgres
+        -c shared_buffers=256MB
+        -c work_mem=64MB
+        -c maintenance_work_mem=512MB
 
 volumes:
   postgres_data:
