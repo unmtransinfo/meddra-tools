@@ -20,7 +20,8 @@ if [ ! -e "$DATADIR" ]; then
 	mkdir $DATADIR
 fi
 #
-DBDIR=$(cd $HOME/../data/MedDRA/${DBVERSION}; pwd)
+DBSUBDIR="MedDRA_$(echo $DBVERSION |sed 's/\./_/')"
+DBDIR=$(cd $HOME/../data/MedDRA/${DBSUBDIR}; pwd)
 #
 if [ ! -e "${DBDIR}" ]; then
 	printf "ERROR: DBDIR not found: ${DBDIR}\n"

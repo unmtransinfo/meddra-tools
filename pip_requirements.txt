@@ -1,0 +1,7 @@
+BioClients==0.2.30
+logging==0.4.9.6
+numpy==2.5.2
+pandas==3.0.5
+psycopg2==2.9.12
+python-dateutil==2.9.0.post0
+six==1.17.0
